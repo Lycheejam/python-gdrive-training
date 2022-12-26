@@ -9,24 +9,17 @@ class ManipulationGoogleDrive:
         self.drive = self.login_with_service_account()
 
     def main(self) -> None:
-        # Create GoogleDriveFile instance with title 'Hello.txt'.
-        file1 = self.drive.CreateFile({"title": "Hello.txt"})
-        file1.Upload()  # Upload the file.
-        print("title: %s, id: %s" % (file1["title"], file1["id"]))
-        # title: Hello.txt, id: {{FILE_ID}}
+        # テキストファイルを作成して共有設定
+        text_file = self.drive.CreateFile({"title": "Hello.txt"})
+        text_file.SetContentFile(
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "../Hello.txt")
+        )
+        text_file.Upload()
 
-        file1.InsertPermission({"type": "anyone", "role": "reader", "value": "anyone"})
-        # TODO: not work
-        # 'Bad Request. User message:
-        # "You cannot share this item because it has been flagged as inappropriate."'
-        # , 'domain': 'global', 'reason': 'invalidSharingRequest'}
-        # permission = file1.InsertPermission({
-        #                 'type': 'user',
-        #                 'role': 'reader',
-        #                 'value': 'example@example.com'
-        #                 })
-
-        print(file1["alternateLink"])  # Display the sharable link.
+        text_file.InsertPermission(
+            {"type": "user", "role": "reader", "value": "example@example.com"},
+            param={"sendNotificationEmails": False},
+        )
 
     # https://docs.iterative.ai/PyDrive2/oauth/#authentication-with-a-service-account
     def login_with_service_account(self, service_account_file_path: str = ""):
